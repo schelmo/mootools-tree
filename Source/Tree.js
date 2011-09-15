@@ -27,6 +27,7 @@ this.Tree = new Class({
 		indicatorOffset: 0,
 		cloneOffset: {x: 16, y: 16},
 		cloneOpacity: 0.8,
+		dragHandle: 'li',
 		checkDrag: Function.from(true),
 		checkDrop: Function.from(true)
 	},
@@ -40,6 +41,9 @@ this.Tree = new Class({
 	setup: function(){
 		this.indicator = new Element('div.treeIndicator');
 		
+		if (!this.element.getElement(this.options.dragHandle))
+			this.options.dragHandle = 'li';		
+		
 		var self = this;
 		this.handler = function(e){
 			self.mousedown(this, e);
@@ -49,19 +53,22 @@ this.Tree = new Class({
 	},
 
 	attach: function(){
-		this.element.addEvent('mousedown:relay(li)', this.handler);
+		this.element.addEvent('mousedown:relay('+this.options.dragHandle+')', this.handler);
 		document.addEvent('mouseup', this.bound('mouseup'));
 		return this;
 	},
 
 	detach: function(){
-		this.element.removeEvent('mousedown:relay(li)', this.handler);
+		this.element.removeEvent('mousedown:relay('+this.options.dragHandle+')', this.handler);
 		document.removeEvent('mouseup', this.bound('mouseup'));
 		return this;
 	},
 
 	mousedown: function(element, event){
 		event.preventDefault();
+		
+		if (this.options.dragHandle != 'li')
+			element = element.getParent('li');
 
 		this.padding = (this.element.getElement('li ul li') || this.element.getElement('li')).getLeft() - this.element.getLeft() + this.options.indicatorOffset;
 		if (this.collapse === undefined && typeof Collapse != 'undefined')
